@@ -4,11 +4,14 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
-import java.sql.Connection;
 import java.util.NoSuchElementException;
 
 /**
- * 组件上下文（Web 应用全局使用）
+ * 组件上下文(Web 应用全局使用)
+ *
+ * @author xuejz
+ * @description
+ * @Time 2021/3/5 14:33
  */
 public class ComponentContext {
 
@@ -36,6 +39,11 @@ public class ComponentContext {
 
     private Context context;
 
+    /**
+     * 初始化上下文
+     *
+     * @throws RuntimeException
+     */
     public void init(ServletContext servletContext) throws RuntimeException {
         try {
             this.context = (Context) new InitialContext().lookup("java:comp/env");
@@ -44,6 +52,17 @@ public class ComponentContext {
         }
         servletContext.setAttribute(CONTEXT_NAME, this);
         ComponentContext.servletContext = servletContext;
+        servletContext.log("初始化 java:comp/env 上下文成功!");
+    }
+
+    public void destroy() throws RuntimeException {
+        if (this.context != null) {
+            try {
+                this.context.close();
+            } catch (NamingException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
@@ -54,22 +73,12 @@ public class ComponentContext {
      * @return
      */
     public <C> C getComponent(String name) {
-        C component = null;
+        C component;
         try {
             component = (C) context.lookup(name);
         } catch (NamingException e) {
             throw new NoSuchElementException(name);
         }
         return component;
-    }
-
-    public void destroy() throws RuntimeException {
-        if (this.context != null) {
-            try {
-                context.close();
-            } catch (NamingException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

@@ -2,18 +2,11 @@ package org.geektimes.projects.user.web.listener;
 
 import org.geektimes.projects.user.context.ComponentContext;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
- * {@link ComponentContext} 初始化器
  * ContextLoaderListener
  */
 public class ComponentContextInitializerListener implements ServletContextListener {
@@ -24,7 +17,8 @@ public class ComponentContextInitializerListener implements ServletContextListen
     public void contextInitialized(ServletContextEvent sce) {
         this.servletContext = sce.getServletContext();
         ComponentContext context = new ComponentContext();
-        context.init(servletContext);
+        servletContext.log("初始化 java:comp/env 上下文...");
+        context.init(servletContext); // 初始化 java:comp/env 上下文, 方便后续获取bean/DBConnectionManager
     }
 
     @Override

@@ -3,19 +3,14 @@ package org.geektimes.projects.user.sql;
 import org.geektimes.projects.user.context.ComponentContext;
 import org.geektimes.projects.user.domain.User;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,23 +18,43 @@ public class DBConnectionManager { // JNDI Component
 
     private final Logger logger = Logger.getLogger(DBConnectionManager.class.getName());
 
+    // componentContext放在这里获取可能会出现问题,
+    // 因为Tomcat容器未必初始化完成 <Resource>中定义的bean可能还没有注入到上下文中
+    // private ComponentContext componentContext = ComponentContext.getInstance();
+
+    /**
+     * 通过jndi获取数据源
+     *
+     * @return
+     */
     public Connection getConnection() {
-        ComponentContext context = ComponentContext.getInstance();
-        // 依赖查找
-        DataSource dataSource = context.getComponent("jdbc/UserPlatformDB");
+        this.logger.log(Level.FINE, "获取jndi数据库连接...");
+        // ComponentContext componentContext = ComponentContext.getInstance();
         Connection connection = null;
         try {
+            DataSource dataSource = ComponentContext.getInstance().getComponent("jdbc/UserPlatformDB");
             connection = dataSource.getConnection();
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
+            this.logger.log(Level.SEVERE, e.getMessage(), e);
         }
         if (connection != null) {
             logger.log(Level.INFO, "获取 JNDI 数据库连接成功！");
-            System.out.println("获取 JNDI 数据库连接成功！");
+            //System.out.println("获取 JNDI 数据库连接成功！");
         }
         return connection;
     }
+//        Context context = null;
+//        Connection connection = null;
+//        try {
+//            context = new InitialContext();
+//            Context envContext = (Context) context.lookup("java:comp/env");
+//            DataSource dataSource = (DataSource) envContext.lookup("jdbc/UserPlatformDB");
+//            connection = dataSource.getConnection();
+//        } catch (NamingException | SQLException e) {
+//
+//        }
 
+//        return null;
 //    private Connection connection;
 //
 //    public void setConnection(Connection connection) {
@@ -86,7 +101,7 @@ public class DBConnectionManager { // JNDI Component
 //        Driver driver = DriverManager.getDriver("jdbc:derby:/db/user-platform;create=true");
 //        Connection connection = driver.connect("jdbc:derby:/db/user-platform;create=true", new Properties());
 
-        String databaseURL = "jdbc:derby:/db/user-platform;create=true";
+        String databaseURL = "jdbc:derby:db/user-platform;create=true";
         Connection connection = DriverManager.getConnection(databaseURL);
 
         Statement statement = connection.createStatement();
