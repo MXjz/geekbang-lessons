@@ -1,6 +1,8 @@
 # geekbang-lessons
 极客时间课程工程
 
+\- branch: learnJpa
+
 ## 重构数据库连接的逻辑
 
 **在项目初始化时创建好数据库连接，并在需要时直接获取已有的数据库连接即可，而不是每次操作数据库时再去加载数据库连接**
@@ -141,3 +143,91 @@ public class ComponentContext {
 }
 ```
 
+## 数据存储 - JPA
+
+### 数据库设计
+
+表与表之间的关系：关联和组合（强和弱的关系）
+
+* 关联：（强关系）
+* 组合：（弱关系）
+
+### JPA简介
+
+* JPA 1.0 整合查询语言和对象关系映射元数据定义
+* JPA 2.0在1.0的基础上，增加Criteria查询、元数据API及校验支持
+
+### 实体
+
+约束：
+
+1. 实体类必须使用@Entity标注或xml描述
+
+2. 实体类必须包含一个默认构造器，并且构造器必须是public或者protected(包内和子类继承访问)
+
+   * 通过反射构造实体类对象，`newInstance()`是调用无参构造函数，所以必须包含一个默认构造器
+
+   ```java
+   Class klass = Class.forName("com.example.User");
+   User user = (User) klass.newInstance();
+   ```
+
+3. 实体类必须是顶级类，不能是枚举或者接口
+
+   * 枚举类的构造方法是private的
+
+4. 禁止是final类
+
+   * 字节码提升的时候需要继承实体类，所以不能让final修饰实体类
+
+5. 实体支持继承，多态关联及多态查询
+
+### 实体关系
+
+实体关系可能一对一，一对多，多对一或者多对多，这些关系是多态性的，可以是单向的或者双向的
+
+#### 注解表示方式
+
+- @OneToOne
+- @OneToMany
+- @ManyToOne
+- @ManyToMany
+
+#### 实体双向关系
+
+两个实体之间不仅存在拥有方，也存在倒转方。主方决定了更新级联关系到数据库
+
+#### 规则
+
+* 倒转必须通过@OneToOne、@OneToMany或@ManyToMany中的mappedBy属性方法关联到拥有方的字段或者属性
+* 一对多、多对一双向关系中的多方必须是主方，因此@ManyToOne注解不能指定mappedBy属性
+* 双向一对一关系中，主方相当于包含外键的一方
+* 双向多对多关系中，任何一方可能是拥有方
+
+#### 实体单向关系
+
+
+
+#### 实体继承
+
+实体类：com.example.User
+
+子实体：com.example.UserProfile extends User，扩展了picture字段
+
+数据库中通过关联来扩展User的字段
+
+##### 继承方式
+
+- 继承抽象实体类
+  - @Inheritance
+- 继承已映射父类型
+  - @MappedSuperClass
+  - @AssociationOverride
+- 继承非实体类型
+
+### JPA 实体管理器
+
+EntityManager = Hibernate Session = Mybatis Session >= JDBC Connection
+
+* 缓存（一级缓存，二级缓存）
+* 延迟加载特性
