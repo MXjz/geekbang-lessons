@@ -1,63 +1,76 @@
 package org.geektimes.projects.user.sql;
 
-import org.geektimes.projects.user.context.ComponentContext;
-import org.geektimes.projects.user.domain.User;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class DBConnectionManager { // JNDI Component
+public class DBConnectionManager {
 
-    private final Logger logger = Logger.getLogger(DBConnectionManager.class.getName());
+    private Connection connection;
 
-    public Connection getConnection() {
-        ComponentContext context = ComponentContext.getInstance();
-        // 依赖查找
-        DataSource dataSource = context.getComponent("jdbc/UserPlatformDB");
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        }
-        if (connection != null) {
-            logger.log(Level.INFO, "获取 JNDI 数据库连接成功！");
-            System.out.println("获取 JNDI 数据库连接成功！");
-        }
-        return connection;
+    public DBConnectionManager(boolean isJndi) {
+        initConnection(isJndi);
     }
 
-//    private Connection connection;
-//
-//    public void setConnection(Connection connection) {
-//        this.connection = connection;
-//    }
-//
-//    public Connection getConnection() {
-//        return this.connection;
-//    }
+    private void initConnection(boolean isJndi) {
+        try {
+            Connection conn;
+            if(!isJndi) {
+                Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+                String databaseURL = "jdbc:derby:db/user-platform;create=true";
+                conn = DriverManager.getConnection(databaseURL);
+            } else {
+                Context ctx = new InitialContext();
+                DataSource dataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/UserPlatformDB");
+                conn = dataSource.getConnection();
+            }
+            // 判断users表是否存在
+            // 如果users表存在,则什么都不做, 如果不存在,则创建
+            confirmTable(conn, "USERS");
+            setConnection(conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 判断表是否存在
+     * @param conn
+     * @throws Exception
+     */
+    private void confirmTable(Connection conn, String tableName) throws Exception{
+        DatabaseMetaData metaData = conn.getMetaData();
+        ResultSet rsTables = metaData.getTables(null, null, null, new String[]{"TABLE"});
+        HashSet<String> set=new HashSet<String>();
+        while (rsTables.next()) {
+            set.add(rsTables.getString("TABLE_NAME"));
+        }
+        if(!set.contains(tableName)) {
+            Statement statement = conn.createStatement();
+            statement.execute(CREATE_USERS_TABLE_DDL_SQL);
+        }
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public Connection getConnection() {
+        return this.connection;
+    }
 
     public void releaseConnection() {
-//        if (this.connection != null) {
-//            try {
-//                this.connection.close();
-//            } catch (SQLException e) {
-//                throw new RuntimeException(e.getCause());
-//            }
-//        }
+        if (this.connection != null) {
+            try {
+                this.connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getCause());
+            }
+        }
     }
 
     public static final String DROP_USERS_TABLE_DDL_SQL = "DROP TABLE users";
@@ -79,92 +92,58 @@ public class DBConnectionManager { // JNDI Component
 
 
     public static void main(String[] args) throws Exception {
-//        通过 ClassLoader 加载 java.sql.DriverManager -> static 模块 {}
+//      调用setLogWriter时, 会通过 ClassLoader 加载 java.sql.DriverManager -> 先调用了静态代码块的代码
+//      调用loadInitialDrivers时, 方法里的日志不会被打印出来,因为还没有执行setLogWriter
 //        DriverManager.setLogWriter(new PrintWriter(System.out));
-//
 //        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
 //        Driver driver = DriverManager.getDriver("jdbc:derby:/db/user-platform;create=true");
 //        Connection connection = driver.connect("jdbc:derby:/db/user-platform;create=true", new Properties());
-
-        String databaseURL = "jdbc:derby:/db/user-platform;create=true";
-        Connection connection = DriverManager.getConnection(databaseURL);
-
-        Statement statement = connection.createStatement();
-        // 删除 users 表
-        System.out.println(statement.execute(DROP_USERS_TABLE_DDL_SQL)); // false
-        // 创建 users 表
-        System.out.println(statement.execute(CREATE_USERS_TABLE_DDL_SQL)); // false
-        System.out.println(statement.executeUpdate(INSERT_USER_DML_SQL));  // 5
-
-        // 执行查询语句（DML）
-        ResultSet resultSet = statement.executeQuery("SELECT id,name,password,email,phoneNumber FROM users");
-
-        // BeanInfo
-        BeanInfo userBeanInfo = Introspector.getBeanInfo(User.class, Object.class);
-
-        // 所有的 Properties 信息
-        for (PropertyDescriptor propertyDescriptor : userBeanInfo.getPropertyDescriptors()) {
-            System.out.println(propertyDescriptor.getName() + " , " + propertyDescriptor.getPropertyType());
+        String databaseURL = "jdbc:derby:db/user-platform;create=true";
+        Connection conn = DriverManager.getConnection(databaseURL);
+        Statement statement = conn.createStatement();
+        DatabaseMetaData metaData = conn.getMetaData();
+        ResultSet rsTables = metaData.getTables(null, null, null, new String[]{"TABLE"});
+        HashSet<String> set=new HashSet<String>();
+        while (rsTables.next()) {
+            set.add(rsTables.getString("TABLE_NAME"));
         }
+        System.out.println(set);
+        // System.out.println(statement.execute(DROP_USERS_TABLE_DDL_SQL)); // 删除users表格 - false
+        //System.out.println(statement.execute(CREATE_USERS_TABLE_DDL_SQL)); // 创建users表 - false
+        //System.out.println(statement.executeUpdate(INSERT_USER_DML_SQL)); // 新增数据到users表 - 5
 
-
-        // 写一个简单的 ORM 框架
-        while (resultSet.next()) { // 如果存在并且游标滚动
-            User user = new User();
-
-            // ResultSetMetaData 元信息
-
-
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            System.out.println("当前表的名称：" + metaData.getTableName(1));
-            System.out.println("当前表的列个数：" + metaData.getColumnCount());
-            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                System.out.println("列名称：" + metaData.getColumnLabel(i) + ", 类型：" + metaData.getColumnClassName(i));
-            }
-
-            StringBuilder queryAllUsersSQLBuilder = new StringBuilder("SELECT");
-            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                queryAllUsersSQLBuilder.append(" ").append(metaData.getColumnLabel(i)).append(",");
-            }
-            // 移除最后一个 ","
-            queryAllUsersSQLBuilder.deleteCharAt(queryAllUsersSQLBuilder.length() - 1);
-            queryAllUsersSQLBuilder.append(" FROM ").append(metaData.getTableName(1));
-
-            System.out.println(queryAllUsersSQLBuilder);
-
-            // 方法直接调用（编译时，生成字节码）
-//            user.setId(resultSet.getLong("id"));
-//            user.setName(resultSet.getString("name"));
-//            user.setPassword(resultSet.getString("password"));
-//            user.setEmail(resultSet.getString("email"));
-//            user.setPhoneNumber(resultSet.getString("phoneNumber"));
-
-            // 利用反射 API，来实现字节码提升
-
-            // User 类是通过配置文件，类名成
-            // ClassLoader.loadClass -> Class.newInstance()
-            // ORM 映射核心思想：通过反射执行代码（性能相对开销大）
-            for (PropertyDescriptor propertyDescriptor : userBeanInfo.getPropertyDescriptors()) {
-                String fieldName = propertyDescriptor.getName();
-                Class fieldType = propertyDescriptor.getPropertyType();
-                String methodName = typeMethodMappings.get(fieldType);
-                // 可能存在映射关系（不过此处是相等的）
-                String columnLabel = mapColumnLabel(fieldName);
-                Method resultSetMethod = ResultSet.class.getMethod(methodName, String.class);
-                // 通过放射调用 getXXX(String) 方法
-                Object resultValue = resultSetMethod.invoke(resultSet, columnLabel);
-                // 获取 User 类 Setter方法
-                // PropertyDescriptor ReadMethod 等于 Getter 方法
-                // PropertyDescriptor WriteMethod 等于 Setter 方法
-                Method setterMethodFromUser = propertyDescriptor.getWriteMethod();
-                // 以 id 为例，  user.setId(resultSet.getLong("id"));
-                setterMethodFromUser.invoke(user, resultValue);
-            }
-
-            System.out.println(user);
-        }
-
-        connection.close();
+        // 执行查询语句
+//        ResultSet resultSet = statement.executeQuery("SELECT id, name, password, email, phoneNumber FROM users");
+//
+//        BeanInfo userBeanInfo = Introspector.getBeanInfo(User.class, Object.class);
+//        ResultSetMetaData metaData = resultSet.getMetaData(); // 获取表的元数据
+//        System.out.println("当前表的列个数: " + metaData.getColumnCount());
+//        System.out.println("当前表名: " + metaData.getTableName(1));
+//        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+//            System.out.println("列名: " + metaData.getColumnLabel(i) + ", 列类型: " + metaData.getColumnType(i));
+//        }
+//        // ORM 映射核心
+//        // 性能较慢, 因为要使用反射来生成执行代码
+//        while (resultSet.next()) { // 如果存在并且游标滚动
+//            User user = new User();
+//
+//            for (PropertyDescriptor descriptor : userBeanInfo.getPropertyDescriptors()) {
+//                // getName返回实体类的字段名, getPropertyType返回实体类的类型
+//                String fieldName = descriptor.getName(); // 字段名
+//                Class fieldType = descriptor.getPropertyType(); // 字段类型
+//                String methodName = typeMethodMappings.get(fieldType); // 根据字段类型获取resultSet的getter方法
+//                // 字段名和实体类的映射关系(此处是相同的)
+//                String columnLabel = mapColumnLabel(fieldName);
+//                Method resultSetMethod = ResultSet.class.getMethod(methodName, String.class); // 根据映射获取ResultSet的方法名
+//                Object resultVal = resultSetMethod.invoke(resultSet, columnLabel); // 通过反射调用 getXXX方法
+//                // 获取实体类的setter方法
+//                Method setterMethodFromUser = descriptor.getWriteMethod();
+//                setterMethodFromUser.invoke(user, resultVal); // 调用实体类的set方法, 参数是从resultSet中获取的
+//            }
+//
+//            System.out.println(user);
+//        }
+        conn.close();
     }
 
     private static String mapColumnLabel(String fieldName) {
