@@ -110,15 +110,29 @@ public class ComponentContext {
             // 2. 初始阶段
             processPostConstruct(component, componentClass);
             // 3. 销毁阶段
-            processPreDestroy();
+            processPreDestroy(component, componentClass);
         });
     }
 
     /**
      * 执行销毁阶段
      */
-    private void processPreDestroy() {
-        // todo
+    private void processPreDestroy(Object component, Class<?> componentClass) {
+        Stream.of(componentClass.getMethods())
+                .filter(method -> {
+                    // 保留非static, 无参数 和 被@PreDestroy注解标注的方法
+                    return !Modifier.isStatic(method.getModifiers()) &&
+                            method.getParameterCount() == 0 &&
+                            method.isAnnotationPresent(PreDestroy.class);
+                })
+                .forEach(method -> {
+                    // 执行被@PreDestroy标记的方法
+                    try {
+                        method.invoke(component);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     /**
