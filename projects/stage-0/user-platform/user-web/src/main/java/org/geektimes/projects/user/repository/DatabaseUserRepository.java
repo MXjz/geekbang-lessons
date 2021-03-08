@@ -5,6 +5,8 @@ import org.geektimes.projects.user.context.ComponentContext;
 import org.geektimes.projects.user.domain.User;
 import org.geektimes.projects.user.sql.DBConnectionManager;
 
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;

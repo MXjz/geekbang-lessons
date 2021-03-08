@@ -3,6 +3,8 @@ package org.geektimes.projects.user.sql;
 import org.geektimes.projects.user.context.ComponentContext;
 import org.geektimes.projects.user.domain.User;
 
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -22,13 +24,20 @@ public class DBConnectionManager { // JNDI Component
     // 因为Tomcat容器未必初始化完成 <Resource>中定义的bean可能还没有注入到上下文中
     // private ComponentContext componentContext = ComponentContext.getInstance();
 
+    @Resource(name = "bean/EntityManager")
+    private EntityManager entityManager;
+
+    public EntityManager getEntityManager() {
+        logger.info("获取EntityManager: " + entityManager.getClass().getName());
+        return entityManager;
+    }
     /**
      * 通过jndi获取数据源
      *
      * @return
      */
     public Connection getConnection() {
-        this.logger.log(Level.FINE, "获取jndi数据库连接...");
+        this.logger.log(Level.INFO, "获取jndi数据库连接...");
         // ComponentContext componentContext = ComponentContext.getInstance();
         Connection connection = null;
         try {

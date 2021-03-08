@@ -86,11 +86,11 @@ public class ComponentContext {
         servletContext.setAttribute(CONTEXT_NAME, this);
         ComponentContext.servletContext = servletContext;
         this.envClassLoader = servletContext.getClassLoader();
-        // 初始化环境变量 获取java:comp/env中的所有上下文
+        // 1. 初始化环境变量 获取java:comp/env中的所有上下文
         initEnvContext();
-        // 实例化环境变量 (java:comp/env中定义的需要用到的), 仅仅是实例化
+        // 2. 实例化环境变量 (java:comp/env中定义的需要用到的), 仅仅是实例化 (new)
         instantiateComponents();
-        // 初始化这些对象
+        // 3. 初始化这些对象
         initializeComponents();
     }
 
@@ -105,11 +105,11 @@ public class ComponentContext {
     private void initializeComponents() {
         componentsMap.values().forEach(component -> {
             Class<?> componentClass = component.getClass();
-            // 注入阶段
+            // 1. 注入阶段
             injectComponent(component, componentClass);
-            // 初始阶段
+            // 2. 初始阶段
             processPostConstruct(component, componentClass);
-            // 销毁阶段
+            // 3. 销毁阶段
             processPreDestroy();
         });
     }
@@ -195,13 +195,20 @@ public class ComponentContext {
      */
     protected void instantiateComponents() {
         // 列出根节点下所有的子节点名称
-        // jndi和spring有什么区别呢? spring允许动态配置
+        // jndi和spring ioc有什么区别呢? spring允许动态配置
         List<String> componentsName = listAllComponentNames();
         // 通过依赖查找，实例化对象（ Tomcat BeanFactory setter 方法的执行，仅支持简单类型）
         // 这个时候的对象仅仅是new了一下,还没有初始化
         componentsName.forEach(item -> componentsMap.put(item, lookupComponent(item)));
     }
 
+    /**
+     * 根据路径搜索component
+     *
+     * @param item
+     * @param <C>
+     * @return
+     */
     private <C> C lookupComponent(String item) {
         return executionInContext(ctx -> (C) ctx.lookup(item));
     }
@@ -236,10 +243,10 @@ public class ComponentContext {
                 String className = element.getClassName();
                 Class<?> targerClass = this.envClassLoader.loadClass(className);
                 if (Context.class.isAssignableFrom(targerClass)) {
-                    // 目录, 递归调用listAllComponent
+                    // 如果当前名称是目录（Context 实现类）的话，递归查找
                     fullNames.addAll(listAllComponentNames(element.getName()));
                 } else {
-                    // 非目录
+                    // 非目录, 当前名称绑定目标类型的话，添加该名称到集合中
                     String fullName = name.startsWith("/") ? element.getName()
                             : name + "/" + element.getName();
                     fullNames.add(fullName);

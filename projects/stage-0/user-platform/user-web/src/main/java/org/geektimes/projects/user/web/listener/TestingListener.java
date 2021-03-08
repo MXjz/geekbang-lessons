@@ -19,6 +19,7 @@ public class TestingListener implements ServletContextListener {
         ComponentContext context = ComponentContext.getInstance();
         DBConnectionManager dbConnectionManager = context.getComponent("bean/DBConnectionManager");
         dbConnectionManager.getConnection();
+        dbConnectionManager.getEntityManager();
     }
 
     @Override
