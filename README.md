@@ -11,6 +11,16 @@ $ mvn clean package -U
 $ java -jar user-web/target/user-web-v1-SNAPSHOT-war-exec.jar 
 ```
 
+访问网址：http://localhost:8080/
+
+1. 点击注册按钮
+
+   ![login](/Users/jzxue/IdeaProjects/mercyblitz-projects-in-github/geekbang-lessons/imgs/login.png)
+
+2. 输入用户信息，点击注册
+
+   ![](/Users/jzxue/IdeaProjects/mercyblitz-projects-in-github/geekbang-lessons/imgs/register.png)
+
 ### 遇到的问题
 
 1. 使用嵌入式derby数据库，在DBConnectionManager类中的main方法执行以下代码没有问题，但是在提供给DatabaseUserRepository使用时初始化数据库连接，conn为null。（暂时解决，还需要研究一下）
