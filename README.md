@@ -10,16 +10,15 @@
 $ mvn clean package -U
 $ java -jar user-web/target/user-web-v1-SNAPSHOT-war-exec.jar 
 ```
-
-访问网址：http://localhost:8080/
+启动成功后，访问网址：http://localhost:8080/
 
 1. 点击注册按钮
 
-   ![login](/Users/jzxue/IdeaProjects/mercyblitz-projects-in-github/geekbang-lessons/imgs/login.png)
+   ![login.png](https://github.com/gingerXue/geekbang-lessons/blob/firstWork/imgs/login.png)
 
 2. 输入用户信息，点击注册
 
-   ![](/Users/jzxue/IdeaProjects/mercyblitz-projects-in-github/geekbang-lessons/imgs/register.png)
+   ![register.png](https://github.com/gingerXue/geekbang-lessons/blob/firstWork/imgs/register.png)
 
 ### 遇到的问题
 
