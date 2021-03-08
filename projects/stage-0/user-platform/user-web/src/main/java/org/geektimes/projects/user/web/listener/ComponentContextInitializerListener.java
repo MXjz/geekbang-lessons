@@ -19,6 +19,7 @@ public class ComponentContextInitializerListener implements ServletContextListen
         ComponentContext context = new ComponentContext();
         servletContext.log("初始化 java:comp/env 上下文...");
         context.init(servletContext); // 初始化 java:comp/env 上下文, 方便后续获取bean/DBConnectionManager
+        servletContext.log("初始化 java:comp/env 上下文完成");
     }
 
     @Override
