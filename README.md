@@ -14,11 +14,7 @@ $ java -jar user-web/target/user-web-v1-SNAPSHOT-war-exec.jar
 
 1. 点击注册按钮
 
-   ![login.png](https://github.com/gingerXue/geekbang-lessons/blob/firstWork/imgs/login.png)
-
 2. 输入用户信息，点击注册
-
-   ![register.png](https://github.com/gingerXue/geekbang-lessons/blob/firstWork/imgs/register.png)
 
 ### 遇到的问题
 
