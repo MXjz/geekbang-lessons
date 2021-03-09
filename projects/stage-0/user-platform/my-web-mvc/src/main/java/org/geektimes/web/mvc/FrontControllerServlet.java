@@ -7,6 +7,10 @@ import org.geektimes.web.mvc.controller.RestController;
 import org.geektimes.web.mvc.header.CacheControlHeaderWriter;
 import org.geektimes.web.mvc.header.annotation.CacheControl;
 
+import javax.annotation.Resource;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -22,13 +26,16 @@ import javax.ws.rs.Path;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.substringAfter;
 
 public class FrontControllerServlet extends HttpServlet {
 
+    private static final String COMPONENT_ENV_CONTEXT_NAME = "java:comp/env"; // jndi目录根节点
     /**
      * 请求路径和 Controller 的映射关系缓存
      */
@@ -55,6 +62,8 @@ public class FrontControllerServlet extends HttpServlet {
     private void initHandleMethods() {
         for (Controller controller : ServiceLoader.load(Controller.class)) {
             Class<?> controllerClass = controller.getClass();
+            // 注入@Resource标注的bean
+            injectResourceFields(controller, controllerClass);
             Path pathFromClass = controllerClass.getAnnotation(Path.class);
             String requestPath = pathFromClass.value();
             Method[] publicMethods = controllerClass.getMethods();
@@ -70,6 +79,43 @@ public class FrontControllerServlet extends HttpServlet {
             }
             controllersMapping.put(requestPath, controller);
         }
+    }
+
+    /**
+     * 注入被@Resource标记的字段
+     * @param controller
+     * @param controllerClass
+     */
+    private void injectResourceFields(Controller controller, Class<?> controllerClass) {
+        Stream.of(controllerClass.getDeclaredFields())
+                .filter(field -> {
+                    // 保留非static和被Resource注解标记的field
+                    int mods = field.getModifiers();
+                    return !Modifier.isStatic(mods) &&
+                            field.isAnnotationPresent(Resource.class);
+                })
+                .forEach(field -> {
+                    Resource resource = field.getAnnotation(Resource.class);
+                    // 获取Resource注解中name定义的内容
+                    String resourceName = resource.name();
+                    Object resourceInstance = lookupComponent(resourceName);
+                    // 注入
+                    field.setAccessible(true);
+                    try {
+                        field.set(controller, resourceInstance);
+                    } catch (IllegalAccessException e) {
+                    }
+                });
+    }
+
+    private <C> C lookupComponent(String item) {
+        try {
+            Context envContext = new InitialContext();
+            return (C) envContext.lookup(COMPONENT_ENV_CONTEXT_NAME + "/" + item);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

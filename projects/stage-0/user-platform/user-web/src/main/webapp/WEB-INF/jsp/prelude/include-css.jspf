@@ -1,1 +1,3 @@
-<link rel="stylesheet" href="/static/css/bootstrap-4.6.0.min.css" crossorigin="anonymous/>
+<link rel="stylesheet" href="/static/bootstrap/css/bootstrap-theme.css" crossorigin="anonymous"/>
+<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" crossorigin="anonymous"/>
+<%--<link rel="stylesheet" href="/static/css/bootstrapValidator.min.css" crossorigin="anonymous"/>--%>

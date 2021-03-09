@@ -1,9 +1,13 @@
 package org.geektimes.projects.user.domain;
 
+import org.geektimes.projects.user.domain.group.ValidateStrategy;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
+
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -17,19 +21,28 @@ import java.util.Objects;
 public class User implements Serializable {
 
     @Id
+    //@NotNull(groups = {ValidateStrategy.UserRegister.class}, message = "id不能为空")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column
+    @NotNull(groups = {ValidateStrategy.UserRegister.class, ValidateStrategy.UserLogin.class}, message = "用户名不得为空")
+    @NotBlank(groups = {ValidateStrategy.UserRegister.class, ValidateStrategy.UserLogin.class}, message = "用户名不得为空")
     private String name;
 
     @Column
+    @Size(groups = {ValidateStrategy.UserRegister.class, ValidateStrategy.UserLogin.class},
+            max = 32,
+            min = 6,
+            message = "密码位数不能小于6位且不能超过32")
     private String password;
 
     @Column
+    @Email(groups = {ValidateStrategy.UserRegister.class}, message = "电子邮件地址不合法")
     private String email;
 
     @Column
+    @Pattern(groups = {ValidateStrategy.UserRegister.class}, regexp = "\\d{11}|\\d{4}-\\d{7,8}", message = "电话号码格式不正确(格式: 18002327777 或 0937-8950190)")
     private String phoneNumber;
 
     public Long getId() {

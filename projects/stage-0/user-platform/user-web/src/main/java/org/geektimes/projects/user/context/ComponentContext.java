@@ -115,25 +115,33 @@ public class ComponentContext {
     }
 
     /**
-     * 执行销毁阶段
+     * 注入阶段
+     *
+     * @param component
+     * @param componentClass
      */
-    private void processPreDestroy(Object component, Class<?> componentClass) {
-        Stream.of(componentClass.getMethods())
-                .filter(method -> {
-                    // 保留非static, 无参数 和 被@PreDestroy注解标注的方法
-                    return !Modifier.isStatic(method.getModifiers()) &&
-                            method.getParameterCount() == 0 &&
-                            method.isAnnotationPresent(PreDestroy.class);
+    private void injectComponent(Object component, Class<?> componentClass) {
+        Stream.of(componentClass.getDeclaredFields())
+                .filter(field -> {
+                    // 保留非static和被Resource注解标记的field
+                    int mods = field.getModifiers();
+                    return !Modifier.isStatic(mods) &&
+                            field.isAnnotationPresent(Resource.class);
                 })
-                .forEach(method -> {
-                    // 执行被@PreDestroy标记的方法
+                .forEach(field -> {
+                    Resource resource = field.getAnnotation(Resource.class);
+                    // 获取Resource注解中name定义的内容
+                    String resourceName = resource.name();
+                    Object injectedObj = lookupComponent(resourceName);
+                    // 注入
+                    field.setAccessible(true);
                     try {
-                        method.invoke(component);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        field.set(component, injectedObj);
+                    } catch (IllegalAccessException e) {
                     }
                 });
     }
+
 
     /**
      * 执行被@PostConstruct标注的方法
@@ -160,30 +168,24 @@ public class ComponentContext {
                 });
     }
 
+
     /**
-     * 注入阶段
-     *
-     * @param component
-     * @param componentClass
+     * 执行销毁阶段
      */
-    private void injectComponent(Object component, Class<?> componentClass) {
-        Stream.of(componentClass.getDeclaredFields())
-                .filter(field -> {
-                    // 保留非static和被Resource注解标记的field
-                    int mods = field.getModifiers();
-                    return !Modifier.isStatic(mods) &&
-                            field.isAnnotationPresent(Resource.class);
+    private void processPreDestroy(Object component, Class<?> componentClass) {
+        Stream.of(componentClass.getMethods())
+                .filter(method -> {
+                    // 保留非static, 无参数 和 被@PreDestroy注解标注的方法
+                    return !Modifier.isStatic(method.getModifiers()) &&
+                            method.getParameterCount() == 0 &&
+                            method.isAnnotationPresent(PreDestroy.class);
                 })
-                .forEach(field -> {
-                    Resource resource = field.getAnnotation(Resource.class);
-                    // 获取Resource注解中name定义的内容
-                    String resourceName = resource.name();
-                    Object injectedObj = lookupComponent(resourceName);
-                    // 注入
-                    field.setAccessible(true);
+                .forEach(method -> {
+                    // 执行被@PreDestroy标记的方法
                     try {
-                        field.set(component, injectedObj);
-                    } catch (IllegalAccessException e) {
+                        method.invoke(component);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 });
     }

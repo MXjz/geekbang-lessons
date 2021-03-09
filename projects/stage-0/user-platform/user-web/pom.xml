@@ -39,6 +39,11 @@
             <artifactId>derby</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+        </dependency>
+
         <!-- Hibernate ORM Core -->
         <dependency>
             <groupId>org.hibernate</groupId>
