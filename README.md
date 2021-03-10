@@ -74,9 +74,7 @@ Tomcat7文档关于jndi的描述：https://tomcat.apache.org/tomcat-7.0-doc/jndi
 
 我认为是职责划分，对java代码的操作进行分层，每一层做自己的事情
 
-#### 步骤
-
-##### 一、定义ComponentContext类
+#### 定义ComponentContext类
 
 在容器启动时，初始化ComponentContext类，目的在于让ComponentContext类作为应用全局可用的（实现依赖注入），方式是利用`ServletContext`的`setAttribute`和`getAttribute`
 
@@ -142,6 +140,124 @@ public class ComponentContext {
     }
 }
 ```
+
+#### 重构ComponentContext类
+
+为ComponentContext增加依赖查找和依赖注入的功能
+
+##### Context初始化
+
+```java
+private void initEnvContext() {
+  if (this.envContext != null) return;
+  Context context = null;
+  try {
+    context = new InitialContext();
+    this.envContext = (Context) context.lookup(COMPONENT_ENV_CONTEXT_NAME);
+  } catch (NamingException e) {
+    throw new RuntimeException(e);
+  } finally {
+    close(context);
+  }
+}
+```
+
+##### 依赖查找
+
+1. 遍历“java:comp/env”下面所有的上下文，排除文件夹，并将上下文存入componentsName
+2. 遍历componentsName，调用lookup将对象放入componentsMap
+
+```java
+protected void instantiateComponents() {
+  // 列出根节点下所有的子节点名称
+  // jndi和spring ioc有什么区别呢? spring允许动态配置
+  List<String> componentsName = listAllComponentNames();
+  // 通过依赖查找，实例化对象（ Tomcat BeanFactory setter 方法的执行，仅支持简单类型）
+  // 这个时候的对象仅仅是new了一下,还没有初始化
+  componentsName.forEach(item -> componentsMap.put(item, lookupComponent(item)));
+}
+```
+
+##### 依赖注入
+
+遍历componentsMap，注入每个component时涉及**三个阶段**
+
+1. 注入阶段
+
+   对类中有@Resource标记的字段进行注入
+
+   ```java
+   private void injectComponent(Object component, Class<?> componentClass) {
+     Stream.of(componentClass.getDeclaredFields())
+       .filter(field -> {
+         // 保留非static和被Resource注解标记的field
+         int mods = field.getModifiers();
+         return !Modifier.isStatic(mods) &&
+           field.isAnnotationPresent(Resource.class);
+       })
+       .forEach(field -> {
+         Resource resource = field.getAnnotation(Resource.class);
+         // 获取Resource注解中name定义的内容
+         String resourceName = resource.name();
+         Object injectedObj = lookupComponent(resourceName);
+         // 注入
+         field.setAccessible(true);
+         try {
+           field.set(component, injectedObj);
+         } catch (IllegalAccessException e) {
+         }
+       });
+   }
+   ```
+
+2. 初始化阶段
+
+   对类中有@PostConstruct标记的方法进行注入
+
+   ```java
+   private void processPostConstruct(Object component, Class<?> componentClass) {
+     Stream.of(componentClass.getMethods())
+       .filter(method -> {
+         // 保留非static, 无参数,被@PostConstruct标注的方法
+         int mods = method.getModifiers();
+         return !Modifier.isStatic(mods) &&
+           method.getParameterCount() == 0 &&
+           method.isAnnotationPresent(PostConstruct.class);
+       })
+       .forEach(method -> {
+         // 执行被@PostConstruct标记的方法
+         try {
+           method.invoke(component);
+         } catch (Exception e) {
+           throw new RuntimeException(e);
+         }
+       });
+   }
+   ```
+
+3. 销毁阶段
+
+   ```java
+   private void processPreDestroy(Object component, Class<?> componentClass) {
+     Stream.of(componentClass.getMethods())
+       .filter(method -> {
+         // 保留非static, 无参数 和 被@PreDestroy注解标注的方法
+         return !Modifier.isStatic(method.getModifiers()) &&
+           method.getParameterCount() == 0 &&
+           method.isAnnotationPresent(PreDestroy.class);
+       })
+       .forEach(method -> {
+         // 执行被@PreDestroy标记的方法
+         try {
+           method.invoke(component);
+         } catch (Exception e) {
+           throw new RuntimeException(e);
+         }
+       });
+   }
+   ```
+
+   
 
 ## 数据存储 - JPA
 
