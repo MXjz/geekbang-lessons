@@ -16,20 +16,13 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * 委派实现(静态AOP实现)
- * 保持容器内单例
- * 目前实现 DelegatingEntityManage : EntityManager -> 1:1 在多线程场景下, 多个线程同时操作entityManager时会有线程不安全的情况发生
- * 所以我们现在需要把关系变化一下, 即DelegatingEntityManager : EntityManage -> 1:N
- *
  * @author xuejz
  * @description
  * @Time 2021/3/8 15:53
  */
 public class DelegatingEntityManager implements EntityManager {
-//    EntityManager 线程不安全, 当多个线程操作entityManager.persist()会出问题
-//    private EntityManager entityManager;
 
-    private EntityManagerFactory entityManagerFactory;
+    private EntityManager entityManager;
 
     private String persistenceUnitName;
 
@@ -37,20 +30,9 @@ public class DelegatingEntityManager implements EntityManager {
 
     @PostConstruct
     public void init() {
-        this.entityManagerFactory
+        EntityManagerFactory entityManagerFactory
                 = Persistence.createEntityManagerFactory(persistenceUnitName, loadProperties(propertiesLocation));
-        // 线程不安全
-//        entityManager = entityManagerFactory.createEntityManager();
-    }
-
-    /**
-     * 为了解决entityManager线程不安全的情况 让每次获取的entityManager都是不同的对象
-     * 避免共享变量
-     *
-     * @return
-     */
-    protected EntityManager getEntityManager() {
-        return entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.createEntityManager();
     }
 
     private Map loadProperties(String propertiesLocation) {
@@ -64,9 +46,9 @@ public class DelegatingEntityManager implements EntityManager {
         }
         // 增加jndi引用处理
         ComponentContext context = ComponentContext.getInstance();
-        for (String propertyName : properties.stringPropertyNames()) {
+        for(String propertyName : properties.stringPropertyNames()) {
             String propertyVal = properties.getProperty(propertyName);
-            if (propertyVal.startsWith("@")) {
+            if(propertyVal.startsWith("@")) {
                 Object componentVal = context.getComponent(propertyVal.substring(1));
                 properties.put(propertyName, componentVal);
             }
@@ -89,12 +71,12 @@ public class DelegatingEntityManager implements EntityManager {
 
     @Override
     public <T> T merge(T t) {
-        return getEntityManager().merge(t);
+        return entityManager.merge(t);
     }
 
     @Override
     public void remove(Object o) {
-        getEntityManager().remove(o);
+        entityManager.remove(o);
     }
 
     @Override
