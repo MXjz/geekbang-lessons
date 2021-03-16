@@ -15,12 +15,7 @@ public class JavaConfig implements Config {
      */
     private List<ConfigSource> configSources = new LinkedList<>();
 
-    private static Comparator<ConfigSource> configSourceComparator = new Comparator<ConfigSource>() {
-        @Override
-        public int compare(ConfigSource o1, ConfigSource o2) {
-            return Integer.compare(o2.getOrdinal(), o1.getOrdinal());
-        }
-    };
+    private static Comparator<ConfigSource> configSourceComparator = (o1, o2) -> Integer.compare(o2.getOrdinal(), o1.getOrdinal());
 
     public JavaConfig() {
         ClassLoader classLoader = getClass().getClassLoader();
