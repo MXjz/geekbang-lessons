@@ -104,8 +104,8 @@ public class DBConnectionManager { // JNDI Component
 //        DriverManager.setLogWriter(new PrintWriter(System.out));
 //
 //        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-//        Driver driver = DriverManager.getDriver("jdbc:derby:db/user-platform;create=true");
-//        Connection connection = driver.connect("jdbc:derby:db/user-platform;create=true", new Properties());
+//        Driver driver = DriverManager.getDriver("jdbc:derby:/db/user-platform;create=true");
+//        Connection connection = driver.connect("jdbc:derby:/db/user-platform;create=true", new Properties());
 
         String databaseURL = "jdbc:derby:db/user-platform;create=true";
         Connection connection = DriverManager.getConnection(databaseURL);

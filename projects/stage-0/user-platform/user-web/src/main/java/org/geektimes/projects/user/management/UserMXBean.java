@@ -5,40 +5,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 动态结构, 无固定结构类型
- * @author xuejz
- * @description
- * @Time 2021/3/14 21:48
+ * 动态结构，无固定接口类型（运行时确定）
  */
 public class UserMXBean implements DynamicMBean {
 
-    // 五个属性, 动态维护
-    // 适用于没有固定结构的属性,方便扩展
-    // id, name, password, email, phoneNumber
-    private Map<String, Object> attributeMap = new HashMap<>();
+    // 五个属性
+    // id、name、password、email、phoneNumber
+    private Map<String, Object> attributes = new HashMap<>();
 
     @Override
     public Object getAttribute(String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
-        if (!attributeMap.containsKey(attribute)) {
-            throw new AttributeNotFoundException("Attribute not found!");
+        if (!attributes.containsKey(attribute)) {
+            throw new AttributeNotFoundException("...");
         }
-        return attributeMap.get(attribute);
+        return attributes.get(attribute);
     }
 
     @Override
     public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
-        attributeMap.put(attribute.getName(), attribute.getValue());
+        attributes.put(attribute.getName(), attribute.getValue());
     }
 
     @Override
     public AttributeList getAttributes(String[] attributes) {
         AttributeList attributeList = new AttributeList();
-        for(String attributeName : attributes) {
-            Object attributeVal;
+        for (String attribute : attributes) {
             try {
-                attributeVal = getAttribute(attributeName);
-                attributeList.add(new Attribute(attributeName, attributeVal));
-            } catch (AttributeNotFoundException | MBeanException | ReflectionException  e) {
+                Object attributeValue = getAttribute(attribute);
+                attributeList.add(new Attribute(attribute, attributeValue));
+            } catch (AttributeNotFoundException | MBeanException | ReflectionException e) {
             }
         }
         return attributeList;
@@ -46,12 +41,13 @@ public class UserMXBean implements DynamicMBean {
 
     @Override
     public AttributeList setAttributes(AttributeList attributes) {
-
         return null;
     }
 
     @Override
     public Object invoke(String actionName, Object[] params, String[] signature) throws MBeanException, ReflectionException {
+        // 方法被调用时
+
         return null;
     }
 

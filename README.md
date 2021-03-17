@@ -1,6 +1,15 @@
 # geekbang-lessons
 极客时间课程工程
 
+## 第三次作业：
+
+项目运行起来后，访问地址：
+
+- http://localhost:8080/jolokia/read/jolokia:name=UserManager 读取UserManager MBean**（读）**
+- http://localhost:8080/jolokia/write/jolokia:name=UserManager/Id/3 设置Userid属性为3**（写）**
+
+
+
 ## 配置管理
 
 ### 设计技巧

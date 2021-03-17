@@ -1,14 +1,13 @@
 package org.geektimes.projects.user.management;
 
+import org.geektimes.projects.user.domain.User;
+
 /**
- * MBean 接口描述
- * @author xuejz
- * @description
- * @Time 2021/3/14 21:26
+ * {@link User} MBean 接口描述
  */
 public interface UserManagerMBean {
 
-    // MBeanAttributeInfo
+    // MBeanAttributeInfo 列表
     Long getId();
 
     void setId(Long id);
@@ -31,4 +30,7 @@ public interface UserManagerMBean {
 
     // MBeanOperationInfo
     String toString();
+
+    User getUser();
+
 }

@@ -2,11 +2,6 @@ package org.geektimes.projects.user.management;
 
 import org.geektimes.projects.user.domain.User;
 
-/**
- * @author xuejz
- * @description
- * @Time 2021/3/15 22:06
- */
 public class UserManager implements UserManagerMBean {
 
     private final User user;
@@ -78,5 +73,9 @@ public class UserManager implements UserManagerMBean {
     @Override
     public String toString() {
         return user.toString();
+    }
+
+    public User getUser() {
+        return user;
     }
 }

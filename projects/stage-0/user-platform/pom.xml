@@ -29,7 +29,7 @@
         <commons-configuration.version>1.10</commons-configuration.version>
         <derby.version>10.1.3.1</derby.version>
         <hibernate.version>5.4.29.Final</hibernate.version>
-        <hibernate.validator.version>6.1.7.Final</hibernate.validator.version>
+        <hibernate.validator.version>5.4.1.Final</hibernate.validator.version>
 
         <!-- MicroProfile 版本-->
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
@@ -43,6 +43,7 @@
         <maven.flatten.version>1.2.5</maven.flatten.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <jolokia.core.version>1.5.0</jolokia.core.version>
     </properties>
 
     <!-- Artifacts 依赖版本管理 -->
@@ -110,7 +111,7 @@
 
             <!-- Hibernate Validator -->
             <dependency>
-                <groupId>org.hibernate.validator</groupId>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
             </dependency>
@@ -120,6 +121,12 @@
                 <groupId>org.eclipse.microprofile.config</groupId>
                 <artifactId>microprofile-config-api</artifactId>
                 <version>${microprofile-config-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jolokia</groupId>
+                <artifactId>jolokia-core</artifactId>
+                <version>${jolokia.core.version}</version>
             </dependency>
 
         </dependencies>
