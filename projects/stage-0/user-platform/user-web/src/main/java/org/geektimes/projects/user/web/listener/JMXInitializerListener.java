@@ -4,7 +4,6 @@ import org.geektimes.projects.user.domain.User;
 import org.geektimes.projects.user.management.UserManager;
 
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

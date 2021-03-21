@@ -53,7 +53,13 @@
 
 利用java spi来加载对应的配置源实现类
 
+#### 层级划分
 
+ConfigSource -> Config -> ConfigProviderResolver
+
+- ConfigSource定义配置源，并添加到spi中
+- Config通过ServiceLoader读取ConfigSource的spi将ConfigSource装配到配置集合`configSources`中，并通过某些策略进行排序。
+- ConfigProviderResolver通过ServiceLoader读取Config的spi将Config装配到ServiceLoader<Config>中，并获取第一个Config
 
 ## 日志管理（Java Logging）
 
