@@ -8,7 +8,7 @@ import java.util.Map;
 public class OperationSystemEnvironmentVariablesConfigSource extends MapBasedConfigSource {
 
     public OperationSystemEnvironmentVariablesConfigSource() {
-        super("Operation System Environment Variables", 300);
+        super("Operation System Environment Variables", 200);
     }
 
     @Override

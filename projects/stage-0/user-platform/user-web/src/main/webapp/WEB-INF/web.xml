@@ -16,9 +16,9 @@
         <listener-class>org.geektimes.projects.user.web.listener.ComponentContextInitializerListener</listener-class>
     </listener>
     
-    <listener>
+    <!--<listener>
         <listener-class>org.geektimes.projects.user.web.listener.TestingListener</listener-class>
-    </listener>
+    </listener>-->
 
     <servlet>
         <servlet-name>default</servlet-name>

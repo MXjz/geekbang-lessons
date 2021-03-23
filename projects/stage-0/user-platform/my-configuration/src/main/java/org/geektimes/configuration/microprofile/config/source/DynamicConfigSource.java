@@ -10,7 +10,7 @@ public class DynamicConfigSource extends MapBasedConfigSource {
     private Map configData;
 
     public DynamicConfigSource() {
-        super("DynamicConfigSource", 500);
+        super("DynamicConfigSource", 400);
     }
 
     @Override
