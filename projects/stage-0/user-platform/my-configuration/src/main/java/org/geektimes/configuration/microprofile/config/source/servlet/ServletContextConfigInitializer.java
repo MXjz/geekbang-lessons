@@ -48,18 +48,23 @@ public class ServletContextConfigInitializer implements ServletContextListener {
          * 但是ServletContextConfigSource的prepareConfigData需要用到servletContext变量, 这时servletContext变量还没有初始化
          * 造成NullPointerException.
          * 如何解决 ? ?
+         * 在执行父类的构造方法时, 增加一个标识符判断是否执行子类继承实现的抽象方法, 并在子类把servletContext初始化完成之后再去执行
+         * 子类实现的抽象方法
          */
         configBuilder.withSources(new ServletContextConfigSource(servletContext));
         Config config = configBuilder.build(); // 获取Config
-        configProviderResolver.registerConfig(config, classLoader); // 注册config 并关联到当前的classLoader
+        // 注册config 并关联到当前的classLoader
+        configProviderResolver.registerConfig(config, classLoader);
+        // 那么怎么扩展可以让Config对象为my-web-mvc使用?
+        servletContext.setAttribute("microconfig", config);
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        ServletContext servletContext = servletContextEvent.getServletContext();
-        ClassLoader classLoader = servletContext.getClassLoader();
-        ConfigProviderResolver configProviderResolver = ConfigProviderResolver.instance();
-        Config config = configProviderResolver.getConfig(classLoader);
-        configProviderResolver.releaseConfig(config);
+//        ServletContext servletContext = servletContextEvent.getServletContext();
+//        ClassLoader classLoader = servletContext.getClassLoader();
+//        ConfigProviderResolver configProviderResolver = ConfigProviderResolver.instance();
+//        Config config = configProviderResolver.getConfig(classLoader);
+//        configProviderResolver.releaseConfig(config);
     }
 }

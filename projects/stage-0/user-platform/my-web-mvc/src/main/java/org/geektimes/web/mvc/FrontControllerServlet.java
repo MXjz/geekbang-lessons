@@ -1,6 +1,8 @@
 package org.geektimes.web.mvc;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.geektimes.web.mvc.controller.Controller;
 import org.geektimes.web.mvc.controller.PageController;
 import org.geektimes.web.mvc.controller.RestController;
@@ -45,7 +47,21 @@ public class FrontControllerServlet extends HttpServlet {
      * @param servletConfig
      */
     public void init(ServletConfig servletConfig) {
+        showMyConfig(servletConfig.getServletContext());
         initHandleMethods();
+    }
+
+    private void showMyConfig(ServletContext servletContext) {
+        Object configObj = servletContext.getAttribute("microconfig");
+        if (configObj == null) return;
+        Config config = (Config) configObj;
+        Iterable<ConfigSource> configSources = config.getConfigSources();
+        for (ConfigSource configSource : configSources) {
+            Set<String> propertyNames = configSource.getPropertyNames();
+            for (String propertyName : propertyNames) {
+                System.out.println("配置信息: key[" + propertyName + "], value:[" + configSource.getValue(propertyName)+"]");
+            }
+        }
     }
 
     /**
