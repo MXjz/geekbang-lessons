@@ -1,4 +1,4 @@
-package org.geektimes.function;
+package org.geektimes.di.function;
 
 @FunctionalInterface
 public interface ThrowableFunction<T, R> {

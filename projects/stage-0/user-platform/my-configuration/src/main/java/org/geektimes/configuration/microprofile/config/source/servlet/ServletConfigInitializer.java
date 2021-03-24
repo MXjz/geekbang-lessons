@@ -4,6 +4,7 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * @author xuejz
@@ -12,9 +13,12 @@ import java.util.Set;
  */
 public class ServletConfigInitializer implements ServletContainerInitializer {
 
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
+
     @Override
     public void onStartup(Set<Class<?>> c, ServletContext servletContext) throws ServletException {
         // 增加 ServletContextListener
         servletContext.addListener(ServletContextConfigInitializer.class);
+        logger.info("ServletContextConfigInitializer ok");
     }
 }
