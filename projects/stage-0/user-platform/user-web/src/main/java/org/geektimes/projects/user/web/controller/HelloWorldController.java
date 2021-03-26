@@ -1,5 +1,7 @@
 package org.geektimes.projects.user.web.controller;
 
+import org.eclipse.microprofile.config.Config;
+import org.geektimes.configuration.microprofile.config.servlet.listener.ConfigServletRequestListener;
 import org.geektimes.web.mvc.controller.PageController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,8 @@ public class HelloWorldController implements PageController {
     @POST
     @Path("/world") // /hello/world -> HelloWorldController
     public String execute(HttpServletRequest request, HttpServletResponse response) throws Throwable {
+        Config config = ConfigServletRequestListener.getConfig();
+        System.out.println(config);
         return "index.jsp";
     }
 }
