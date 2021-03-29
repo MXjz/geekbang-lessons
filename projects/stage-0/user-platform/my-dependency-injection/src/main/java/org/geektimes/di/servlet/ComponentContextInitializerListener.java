@@ -1,7 +1,7 @@
 package org.geektimes.di.servlet;
 
 
-import org.geektimes.di.context.ComponentContext;
+import org.geektimes.di.context.ClassicComponentContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -9,7 +9,7 @@ import javax.servlet.ServletContextListener;
 import java.util.logging.Logger;
 
 /**
- * {@link ComponentContext} 初始化器
+ * {@link ClassicComponentContext} 初始化器
  * ContextLoaderListener
  */
 public class ComponentContextInitializerListener implements ServletContextListener {
@@ -22,7 +22,7 @@ public class ComponentContextInitializerListener implements ServletContextListen
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         this.servletContext = sce.getServletContext();
-        ComponentContext context = new ComponentContext();
+        ClassicComponentContext context = new ClassicComponentContext();
         context.init(servletContext);
         logger.info("ComponentContext init ok");
     }
