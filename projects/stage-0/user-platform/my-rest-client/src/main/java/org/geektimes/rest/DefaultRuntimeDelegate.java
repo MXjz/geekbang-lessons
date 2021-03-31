@@ -7,6 +7,11 @@ import org.geektimes.rest.core.DefaultUriBuilder;
 import javax.ws.rs.core.*;
 import javax.ws.rs.ext.RuntimeDelegate;
 
+/**
+ * @author xuejz
+ * @description
+ * @Time 2021/3/31 10:14
+ */
 public class DefaultRuntimeDelegate extends RuntimeDelegate {
 
     @Override

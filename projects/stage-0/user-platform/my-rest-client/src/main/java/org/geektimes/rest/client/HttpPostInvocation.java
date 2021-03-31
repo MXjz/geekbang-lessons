@@ -1,24 +1,9 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.geektimes.rest.client;
 
 import org.geektimes.rest.core.DefaultResponse;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.GenericType;
@@ -36,9 +21,9 @@ import java.util.concurrent.Future;
 /**
  * @author xuejz
  * @description
- * @Time 2021/3/31 14:29
+ * @Time 2021/3/31 16:35
  */
-class HttpGetInvocation implements Invocation {
+public class HttpPostInvocation implements Invocation {
 
     private final URI uri;
 
@@ -46,14 +31,18 @@ class HttpGetInvocation implements Invocation {
 
     private final MultivaluedMap<String, Object> headers;
 
-    HttpGetInvocation(URI uri, MultivaluedMap<String, Object> headers) {
+    private final Entity<?> entity;
+
+    public HttpPostInvocation(URI uri, MultivaluedMap<String, Object> headers, Entity<?> entity) {
         this.uri = uri;
-        this.headers = headers;
         try {
             this.url = uri.toURL();
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException();
         }
+        this.headers = headers;
+        this.entity = entity;
+
     }
 
     @Override
@@ -63,31 +52,18 @@ class HttpGetInvocation implements Invocation {
 
     @Override
     public Response invoke() {
-        HttpURLConnection connection = null;
+        HttpURLConnection connection;
         try {
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(HttpMethod.GET);
+            connection.setRequestMethod(HttpMethod.POST);
             setRequestHeaders(connection);
-            // TODO Set the cookies
             int statusCode = connection.getResponseCode();
-//            Response.ResponseBuilder responseBuilder = Response.status(statusCode);
-//
-//            responseBuilder.build();
             DefaultResponse response = new DefaultResponse();
             response.setConnection(connection);
             response.setStatus(statusCode);
             return response;
-//            Response.Status status = Response.Status.fromStatusCode(statusCode);
-//            switch (status) {
-//                case Response.Status.OK:
-//
-//                    break;
-//                default:
-//                    break;
-//            }
-
         } catch (IOException e) {
-            // TODO Error handler
+            e.printStackTrace();
         }
         return null;
     }

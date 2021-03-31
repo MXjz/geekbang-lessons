@@ -5,6 +5,11 @@ import javax.ws.rs.core.Variant;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * @author xuejz
+ * @description
+ * @Time 2021/3/31 16:24
+ */
 public class DefaultVariantListBuilder extends Variant.VariantListBuilder {
 
     @Override

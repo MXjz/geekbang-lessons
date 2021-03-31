@@ -10,7 +10,7 @@ import java.net.URL;
 public class HttpURLConnectionDemo {
 
     public static void main(String[] args) throws Throwable {
-        URI uri = new URI("http://127.0.0.1:8080/hello/world");
+        URI uri = new URI("http://127.0.0.1:9095/get/test");
         URL url = uri.toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");

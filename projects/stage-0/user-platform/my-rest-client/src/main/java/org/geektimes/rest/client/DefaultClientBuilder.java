@@ -8,6 +8,11 @@ import javax.ws.rs.core.Configuration;
 import java.security.KeyStore;
 import java.util.Map;
 
+/**
+ * @author xuejz
+ * @description
+ * @Time 2021/3/31 16:20
+ */
 public class DefaultClientBuilder extends ClientBuilder {
 
     private Configuration configuration;

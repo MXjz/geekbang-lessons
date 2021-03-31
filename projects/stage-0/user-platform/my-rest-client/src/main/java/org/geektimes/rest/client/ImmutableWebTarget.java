@@ -8,6 +8,11 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Map;
 
+/**
+ * @author xuejz
+ * @description
+ * @Time 2021/3/31 11:23
+ */
 public class ImmutableWebTarget implements WebTarget {
 
     private final UriBuilder uriBuilder;

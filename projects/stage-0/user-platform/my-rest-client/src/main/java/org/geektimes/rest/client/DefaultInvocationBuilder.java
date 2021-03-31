@@ -8,6 +8,11 @@ import javax.ws.rs.core.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * @author xuejz
+ * @description
+ * @Time 2021/3/31 14:17
+ */
 public class DefaultInvocationBuilder implements Invocation.Builder {
 
     private final UriBuilder uriBuilder;
@@ -32,7 +37,10 @@ public class DefaultInvocationBuilder implements Invocation.Builder {
 
     @Override
     public Invocation.Builder accept(String... mediaTypes) {
-        return accept(Stream.of(mediaTypes).map(MediaType::valueOf).toArray(MediaType[]::new));
+        return accept(
+                Stream.of(mediaTypes)
+                        .map(MediaType::valueOf)
+                        .toArray(MediaType[]::new));
     }
 
     @Override
@@ -252,7 +260,7 @@ public class DefaultInvocationBuilder implements Invocation.Builder {
 
     @Override
     public Invocation buildPost(Entity<?> entity) {
-        return null;
+        return new HttpPostInvocation(uriBuilder.build(), headers, entity);
     }
 
     @Override

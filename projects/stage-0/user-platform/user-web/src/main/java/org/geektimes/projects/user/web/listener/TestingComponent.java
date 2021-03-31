@@ -16,8 +16,13 @@
  */
 package org.geektimes.projects.user.web.listener;
 
+import org.apache.activemq.command.ActiveMQTextMessage;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 /**
@@ -30,8 +35,19 @@ public class TestingComponent {
     @Resource(name = "jms/activemq-topic")
     private Topic topic;
 
+    @Resource(name = "jms/message-producer")
+    private MessageProducer messageProducer;
+
     @PostConstruct
     public void init() {
         System.out.println(topic);
+    }
+
+    @PostConstruct
+    public void testMessageProducer() throws Throwable {
+        String message = "Hello xuejz";
+        TextMessage textMessage = new ActiveMQTextMessage();
+        textMessage.setText(message);
+        messageProducer.send(textMessage);
     }
 }

@@ -1,7 +1,5 @@
 package org.geektimes.rest.client;
 
-import org.geektimes.rest.core.DefaultUriBuilder;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -13,6 +11,11 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Map;
 
+/**
+ * @author xuejz
+ * @description
+ * @Time 2021/3/31 16:17
+ */
 public class DefaultClient implements Client {
 
     @Override

@@ -67,4 +67,12 @@
               type="org.apache.activemq.command.ActiveMQTopic"
               factory="org.apache.activemq.jndi.JNDIReferenceFactory"
               physicalName="activemq-topic"/>
+
+    <Resource name="jms/message-producer"
+              auth="Container"
+              type="javax.jms.MessageProducer"
+              factory="org.geektimes.projects.user.message.MessageProducerFactory"
+              queueName="TEST.DOO"
+              connectionFactoryJndiName="jms/activemq-factory"
+    />
 </Context>

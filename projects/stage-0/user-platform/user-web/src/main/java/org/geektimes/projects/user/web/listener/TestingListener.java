@@ -82,20 +82,29 @@ public class TestingListener implements ServletContextListener {
             TextMessage message = session.createTextMessage(text);
 
             // Tell the producer to send the message
-            System.out.println("Sent message: " + message.hashCode() + " : " + Thread.currentThread().getName());
+            // System.out.println("Sent message: " + message.hashCode() + " : " + Thread.currentThread().getName());
             producer.send(message);
+            System.out.printf("[Thread : %s] Sent message: %d\n", Thread.currentThread().getName(), message.hashCode());
 
             // Create a MessageConsumer from the Session to the Topic or Queue
             MessageConsumer consumer = session.createConsumer(destination);
 
             // Wait for a message
-            message = (TextMessage) consumer.receive(1000);
-
-            System.out.println("Received: " + message.getText());
+            consumer.setMessageListener(m -> {
+                TextMessage tm = (TextMessage) m;
+                try {
+                    System.out.printf("[Thread : %s] Received message: %s\n", Thread.currentThread().getName(), tm.getText());
+                } catch (JMSException e) {
+                    throw new RuntimeException("获取消息失败", e);
+                }
+            });
+//            message = (TextMessage) consumer.receive(1000);
+//
+//            System.out.println("Received: " + message.getText());
 
             // Clean up
-            session.close();
-            connection.close();
+//            session.close();
+//            connection.close();
         } catch (JMSException e) {
 
         }
