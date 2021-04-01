@@ -1,6 +1,9 @@
 package org.geektimes.rest.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.geektimes.rest.core.DefaultResponse;
+import org.geektimes.rest.entity.TestEntity;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
@@ -10,6 +13,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -56,7 +60,12 @@ public class HttpPostInvocation implements Invocation {
         try {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(HttpMethod.POST);
-            setRequestHeaders(connection);
+            setRequestHeaders(connection); // 设置请求头
+            //设置是否向HttpUrlConnction输出，因为这个是POST请求，参数要放在http正文内，因此需要设为true，默认情况下是false
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setUseCaches(false); // 不使用缓存
+            setPostBody(connection);
             int statusCode = connection.getResponseCode();
             DefaultResponse response = new DefaultResponse();
             response.setConnection(connection);
@@ -66,6 +75,23 @@ public class HttpPostInvocation implements Invocation {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void setPostBody(HttpURLConnection connection) {
+        TestEntity testEntity = (TestEntity) entity.getEntity();
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonEntity = null;
+        try {
+            jsonEntity = mapper.writeValueAsString(testEntity);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonEntity.getBytes();
+            os.write(input, 0, input.length);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setRequestHeaders(HttpURLConnection connection) {

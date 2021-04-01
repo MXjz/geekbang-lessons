@@ -1,9 +1,12 @@
 package org.geektimes.rest.demo;
 
+import org.geektimes.rest.entity.TestEntity;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class RestClientDemo {
@@ -18,12 +21,13 @@ public class RestClientDemo {
 //        String content = response.readEntity(String.class);
 //        System.out.println(content);
         // POST 请求
-        Form formData = new Form("user", "darling");
-        Entity<Form> entity = Entity.form(formData);
+        TestEntity testEntity = new TestEntity();
+        testEntity.setUser("darling");
+        Entity<TestEntity> entity = Entity.json(testEntity);
         Response response = client
                 .target("http://127.0.0.1:9095/post/test")
                 .request()
-                .header("Content-type", "multipart/form-data")
+                .header("Content-Type", "application/json")
                 .post(entity);
         String content = response.readEntity(String.class);
         System.out.println(content);
