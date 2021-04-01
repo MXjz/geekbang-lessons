@@ -67,6 +67,9 @@ public class HttpPostInvocation implements Invocation {
             connection.setUseCaches(false); // 不使用缓存
             setPostBody(connection);
             int statusCode = connection.getResponseCode();
+            if (statusCode != 200)
+                throw (new RuntimeException("Invalid HTTP response status "
+                        + "code " + statusCode + " from web service server."));
             DefaultResponse response = new DefaultResponse();
             response.setConnection(connection);
             response.setStatus(statusCode);
