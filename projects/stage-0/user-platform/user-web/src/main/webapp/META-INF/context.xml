@@ -73,6 +73,6 @@
               type="javax.jms.MessageProducer"
               factory="org.geektimes.projects.user.message.MessageProducerFactory"
               queueName="TEST.DOO"
-              connectionFactoryJndiName="jms/activemq-factory"
+              connectionFactoryJndiName="activemq-factory"
     />
 </Context>
