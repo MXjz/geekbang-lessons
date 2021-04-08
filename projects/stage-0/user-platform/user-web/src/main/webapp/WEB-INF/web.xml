@@ -100,6 +100,25 @@
         <welcome-file>/index.jsp</welcome-file>
     </welcome-file-list>
 
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Hello,World</web-resource-name>
+            <url-pattern>/hello/world</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- NOTE:  This role is not present in the default users file -->
+            <role-name>tomcat </role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <!-- Define the Login Configuration for this Application -->
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>Tomcat Host Manager Application</realm-name>
+    </login-config>
+    <security-role>
+        <role-name>tomcat</role-name>
+    </security-role>
 <!--    <resource-ref>-->
 <!--        <description>DB Connection</description>-->
 <!--        &lt;!&ndash; JNDI javax.naming.Name &ndash;&gt;-->

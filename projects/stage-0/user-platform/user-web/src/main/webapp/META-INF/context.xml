@@ -67,4 +67,8 @@
               type="org.apache.activemq.command.ActiveMQTopic"
               factory="org.apache.activemq.jndi.JNDIReferenceFactory"
               physicalName="activemq-topic"/>
+
+    <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <Realm className="org.apache.catalina.realm.MemoryRealm" pathName="conf/tomcat-users.xml" />
+    </Realm>
 </Context>

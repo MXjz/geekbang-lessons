@@ -126,6 +126,9 @@
                                     <!-- ServletContext 路径 -->
                                     <path>/</path>
                                     <enableNaming>true</enableNaming>
+                                    <tomcatConfigurationFilesDirectory>
+                                        src/main/webapp/META-INF/conf
+                                    </tomcatConfigurationFilesDirectory>
                                 </configuration>
                             </execution>
                         </executions>
