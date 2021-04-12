@@ -19,7 +19,6 @@ package org.geektimes.cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
-import javax.cache.annotation.CachePut;
 import javax.cache.configuration.OptionalFeature;
 import javax.cache.spi.CachingProvider;
 import java.io.IOException;
@@ -116,6 +115,8 @@ public class ConfigurableCachingProvider implements CachingProvider {
 
         String key = generateCacheManagerKey(actualURI, actualClassLoader, actualProperties);
 
+        // computeIfAbsent含义:
+        // 若key对应的value为空，会将第二个参数的返回值存入并返回
         return cacheManagersRepository.computeIfAbsent(key, k ->
                 newCacheManager(actualURI, actualClassLoader, actualProperties));
     }

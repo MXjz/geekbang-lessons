@@ -128,6 +128,7 @@ public class CacheEntryEventListenerAdapter<K, V> implements ConditionalCacheEnt
 
         if (filter == null) {
             // When null no filtering is applied and all appropriate events are notified.
+            // 如果没有过滤器,默认返回true,通俗来讲就是不需要过滤器了
             filter = e -> true;
         }
 

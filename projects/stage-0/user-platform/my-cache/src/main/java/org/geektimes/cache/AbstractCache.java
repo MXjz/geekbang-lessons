@@ -54,7 +54,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     protected final FallbackStorage fallbackStorage;
 
-    private final CacheEntryEventPublisher entryEventPublisher;
+    private final CacheEntryEventPublisher entryEventPublisher; // Cache Event 发送器
 
     private volatile boolean closed = false;
 

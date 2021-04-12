@@ -156,7 +156,14 @@ public abstract class AbstractCacheManager implements CacheManager {
         for (Map<KeyValueTypePair, Cache> cacheMap : cacheRepository.values()) {
             iterateCaches(cacheMap.values(), CLOSE_CACHE_OPERATION);
         }
+        doClose();
         this.closed = true;
+    }
+
+    /**
+     * 子类可能重写该方法
+     */
+    protected void doClose() {
     }
 
     protected void iterateCaches(Iterable<Cache> caches, Consumer<Cache>... cacheOperations) {
