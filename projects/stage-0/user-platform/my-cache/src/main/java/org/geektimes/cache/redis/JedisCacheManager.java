@@ -3,7 +3,6 @@ package org.geektimes.cache.redis;
 import org.geektimes.cache.AbstractCacheManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import javax.cache.Cache;
 import javax.cache.configuration.Configuration;
@@ -12,9 +11,7 @@ import java.net.URI;
 import java.util.Properties;
 
 /**
- * @author xuejz
- * @description
- * @Time 2021/4/11 21:15
+ * {@link javax.cache.CacheManager} based on Jedis
  */
 public class JedisCacheManager extends AbstractCacheManager {
 
@@ -33,6 +30,6 @@ public class JedisCacheManager extends AbstractCacheManager {
 
     @Override
     protected void doClose() {
-        this.jedisPool.close();
+        jedisPool.close();
     }
 }

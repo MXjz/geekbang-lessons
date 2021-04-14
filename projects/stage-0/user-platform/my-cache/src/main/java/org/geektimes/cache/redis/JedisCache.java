@@ -10,41 +10,38 @@ import javax.cache.configuration.Configuration;
 import java.io.*;
 import java.util.Set;
 
-/**
- * @author xuejz
- * @description
- * @Time 2021/4/11 21:18
- */
 public class JedisCache<K extends Serializable, V extends Serializable> extends AbstractCache<K, V> {
 
     private final Jedis jedis;
 
-    protected JedisCache(CacheManager cacheManager, String cacheName, Configuration<K, V> configuration, Jedis jedis) {
+    public JedisCache(CacheManager cacheManager, String cacheName,
+                      Configuration<K, V> configuration, Jedis jedis) {
         super(cacheManager, cacheName, configuration);
         this.jedis = jedis;
     }
 
     @Override
+    protected boolean containsEntry(K key) throws CacheException, ClassCastException {
+        byte[] keyBytes = serialize(key);
+        return jedis.exists(keyBytes);
+    }
+
+    @Override
     protected ExpirableEntry<K, V> getEntry(K key) throws CacheException, ClassCastException {
-        byte[] keyBytes = serialize(key); // 序列化key
+        byte[] keyBytes = serialize(key);
         return getEntry(keyBytes);
     }
 
-    protected ExpirableEntry<K, V> getEntry(byte[] key) throws CacheException, ClassCastException {
-        byte[] valBytes = jedis.get(key);
-        return ExpirableEntry.of(deserialize(key), deserialize(valBytes));
+    protected ExpirableEntry<K, V> getEntry(byte[] keyBytes) throws CacheException, ClassCastException {
+        byte[] valueBytes = jedis.get(keyBytes);
+        return ExpirableEntry.of(deserialize(keyBytes), deserialize(valueBytes));
     }
 
     @Override
-    protected boolean containsEntry(K key) throws CacheException, ClassCastException {
-        return jedis.exists(serialize(key));
-    }
-
-    @Override
-    protected void putEntry(ExpirableEntry<K, V> newEntry) throws CacheException, ClassCastException {
-        byte[] keyBytes = serialize(newEntry.getKey());
-        byte[] valBytes = serialize(newEntry.getValue());
-        jedis.set(keyBytes, valBytes);
+    protected void putEntry(ExpirableEntry<K, V> entry) throws CacheException, ClassCastException {
+        byte[] keyBytes = serialize(entry.getKey());
+        byte[] valueBytes = serialize(entry.getValue());
+        jedis.set(keyBytes, valueBytes);
     }
 
     @Override
@@ -56,12 +53,15 @@ public class JedisCache<K extends Serializable, V extends Serializable> extends 
     }
 
     @Override
-    protected Set<K> keySet() {
-        return null;
+    protected void clearEntries() throws CacheException {
+        // TODO
     }
 
+
     @Override
-    protected void clearEntries() throws CacheException {
+    protected Set<K> keySet() {
+        // TODO
+        return null;
     }
 
     @Override
@@ -69,40 +69,35 @@ public class JedisCache<K extends Serializable, V extends Serializable> extends 
         this.jedis.close();
     }
 
-    /**
-     * 序列化对象
-     *
-     * @param key
-     * @return
-     * @throws CacheException
-     */
-    private byte[] serialize(Object key) throws CacheException {
+    // 是否可以抽象出一套序列化和反序列化的 API
+    private byte[] serialize(Object value) throws CacheException {
         byte[] bytes = null;
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-            objectOutputStream.writeObject(key);
-            bytes = byteArrayOutputStream.toByteArray();
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)
+        ) {
+            // Key -> byte[]
+            objectOutputStream.writeObject(value);
+            bytes = outputStream.toByteArray();
         } catch (IOException e) {
             throw new CacheException(e);
         }
         return bytes;
     }
 
-    /**
-     * 反序列化
-     *
-     * @param valBytes
-     * @throws CacheException
-     */
-    private <T> T deserialize(byte[] valBytes) throws CacheException {
-        if (valBytes == null) return null;
-        T val = null;
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(valBytes);
-             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
-            val = (T) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+    private <T> T deserialize(byte[] bytes) throws CacheException {
+        if (bytes == null) {
+            return null;
+        }
+        T value = null;
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)
+        ) {
+            // byte[] -> Value
+            value = (T) objectInputStream.readObject();
+        } catch (Exception e) {
             throw new CacheException(e);
         }
-        return val;
+        return value;
     }
+
 }

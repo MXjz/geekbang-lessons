@@ -38,6 +38,7 @@ public class FileFallbackStorage extends AbstractFallbackStorage<Object, Object>
 
     public FileFallbackStorage() {
         super(Integer.MAX_VALUE);
+        makeCacheFallbackDirectory();
     }
 
     File toStorageFile(Object key) {
@@ -104,7 +105,7 @@ public class FileFallbackStorage extends AbstractFallbackStorage<Object, Object>
 
     private void makeCacheFallbackDirectory() {
         if (!CACHE_FALLBACK_DIRECTORY.exists() && !CACHE_FALLBACK_DIRECTORY.mkdirs()) {
-            throw new RuntimeException(format("The fallback directory[path:%s] can't be created!", CACHE_FALLBACK_DIRECTORY));
+            throw new RuntimeException(format("The fallback directory[path:%s] can't be created!"));
         }
     }
 }

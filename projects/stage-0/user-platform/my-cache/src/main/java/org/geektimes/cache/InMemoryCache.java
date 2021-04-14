@@ -41,24 +41,13 @@ public class InMemoryCache<K, V> extends AbstractCache<K, V> {
     }
 
     @Override
-    protected ExpirableEntry<K, V> getEntry(K key) throws CacheException, ClassCastException {
-        return cache.get(key);
-    }
-
-    @Override
     protected boolean containsEntry(K key) throws CacheException, ClassCastException {
         return cache.containsKey(key);
     }
 
     @Override
-    protected void putEntry(ExpirableEntry<K, V> newEntry) throws CacheException, ClassCastException {
-        K key = newEntry.getKey();
-        cache.put(key, newEntry);
-    }
-
-    @Override
-    protected ExpirableEntry<K, V> removeEntry(K key) throws CacheException, ClassCastException {
-        return cache.remove(key);
+    protected ExpirableEntry<K, V> getEntry(K key) throws CacheException, ClassCastException {
+        return cache.get(key);
     }
 
     @Override
@@ -67,7 +56,19 @@ public class InMemoryCache<K, V> extends AbstractCache<K, V> {
     }
 
     @Override
+    protected void putEntry(ExpirableEntry<K, V> entry) throws CacheException, ClassCastException {
+        K key = entry.getKey();
+        cache.put(key, entry);
+    }
+
+    @Override
+    protected ExpirableEntry<K, V> removeEntry(K key) throws CacheException, ClassCastException {
+        return cache.remove(key);
+    }
+
+    @Override
     protected void clearEntries() throws CacheException {
         cache.clear();
     }
+
 }

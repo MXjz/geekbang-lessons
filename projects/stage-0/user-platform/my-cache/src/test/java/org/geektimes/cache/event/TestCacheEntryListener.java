@@ -57,9 +57,7 @@ public class TestCacheEntryListener<K, V> implements CacheEntryCreatedListener<K
     }
 
     private void handleEvents(String source, Iterable<CacheEntryEvent<? extends K, ? extends V>> cacheEntryEvents) {
-        cacheEntryEvents.forEach(event -> {
-            handleEvent(source, event);
-        });
+        cacheEntryEvents.forEach(event -> handleEvent(source, event));
     }
 
     private void handleEvent(String source, CacheEntryEvent<? extends K, ? extends V> event) {
@@ -85,12 +83,16 @@ public class TestCacheEntryListener<K, V> implements CacheEntryCreatedListener<K
 
     @Override
     public Factory<CacheEntryEventFilter<? super K, ? super V>> getCacheEntryEventFilterFactory() {
-        return () -> event -> true;
+        return () -> e -> true;
     }
 
     @Override
     public boolean isSynchronous() {
         return synchronous;
+    }
+
+    public void setOldValueRequired(boolean oldValueRequired) {
+        this.oldValueRequired = oldValueRequired;
     }
 
     public void setSynchronous(boolean synchronous) {

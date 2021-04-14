@@ -130,7 +130,7 @@ public abstract class AbstractCacheManager implements CacheManager {
     }
 
     @Override
-    public void destroyCache(String cacheName) throws NullPointerException, IllegalStateException{
+    public void destroyCache(String cacheName) throws NullPointerException, IllegalStateException {
         requireNonNull(cacheName, "The 'cacheName' argument must not be null.");
         assertNotClosed();
         Map<KeyValueTypePair, Cache> cacheMap = cacheRepository.remove(cacheName);
@@ -160,7 +160,7 @@ public abstract class AbstractCacheManager implements CacheManager {
     }
 
     @Override
-    public void close() {
+    public final void close() {
         if (isClosed()) {
             logger.warning("The CacheManager has been closed, current close operation will be ignored!");
             return;
