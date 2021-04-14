@@ -36,12 +36,6 @@ public class FileFallbackStorage extends AbstractFallbackStorage<Object, Object>
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
-    static {
-        if (!CACHE_FALLBACK_DIRECTORY.exists() && !CACHE_FALLBACK_DIRECTORY.mkdirs()) {
-            throw new RuntimeException(format("The fallback directory[path:%s] can't be created!"));
-        }
-    }
-
     public FileFallbackStorage() {
         super(Integer.MAX_VALUE);
     }
@@ -94,4 +88,23 @@ public class FileFallbackStorage extends AbstractFallbackStorage<Object, Object>
         storageFile.delete();
     }
 
+    @Override
+    public void destroy() {
+        destroyCacheFallbackDirectory();
+    }
+
+    private void destroyCacheFallbackDirectory() {
+        if (CACHE_FALLBACK_DIRECTORY.exists()) {
+            // Delete all files into directory
+            for (File storageFile : CACHE_FALLBACK_DIRECTORY.listFiles()) {
+                storageFile.delete();
+            }
+        }
+    }
+
+    private void makeCacheFallbackDirectory() {
+        if (!CACHE_FALLBACK_DIRECTORY.exists() && !CACHE_FALLBACK_DIRECTORY.mkdirs()) {
+            throw new RuntimeException(format("The fallback directory[path:%s] can't be created!", CACHE_FALLBACK_DIRECTORY));
+        }
+    }
 }

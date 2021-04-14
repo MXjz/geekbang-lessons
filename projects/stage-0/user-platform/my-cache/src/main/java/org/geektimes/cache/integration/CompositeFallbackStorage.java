@@ -80,4 +80,9 @@ public class CompositeFallbackStorage extends AbstractFallbackStorage<Object, Ob
     public void delete(Object key) throws CacheWriterException {
         fallbackStorages.forEach(fallbackStorage -> fallbackStorage.delete(key));
     }
+
+    @Override
+    public void destroy() {
+        fallbackStorages.forEach(FallbackStorage::destroy);
+    }
 }

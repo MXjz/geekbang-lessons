@@ -1,13 +1,14 @@
 package org.geektimes.cache.redis;
 
 import org.geektimes.cache.AbstractCache;
+import org.geektimes.cache.ExpirableEntry;
 import redis.clients.jedis.Jedis;
 
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
 import java.io.*;
-import java.util.Iterator;
+import java.util.Set;
 
 /**
  * @author xuejz
@@ -24,36 +25,43 @@ public class JedisCache<K extends Serializable, V extends Serializable> extends 
     }
 
     @Override
-    protected V doGet(K key) throws CacheException, ClassCastException {
-        byte[] keyBytes = serialize(key);
-        return doGet(keyBytes);
+    protected ExpirableEntry<K, V> getEntry(K key) throws CacheException, ClassCastException {
+        byte[] keyBytes = serialize(key); // 序列化key
+        return getEntry(keyBytes);
     }
 
-    protected V doGet(byte[] key) throws CacheException, ClassCastException {
+    protected ExpirableEntry<K, V> getEntry(byte[] key) throws CacheException, ClassCastException {
         byte[] valBytes = jedis.get(key);
-        return valBytes == null ? null : deserialize(valBytes);
+        return ExpirableEntry.of(deserialize(key), deserialize(valBytes));
     }
 
     @Override
-    protected V doPut(K key, V value) throws CacheException, ClassCastException {
-        byte[] keyBytes = serialize(key);
-        byte[] valBytes = serialize(value);
-        V oldVal = doGet(key);
+    protected boolean containsEntry(K key) throws CacheException, ClassCastException {
+        return jedis.exists(serialize(key));
+    }
+
+    @Override
+    protected void putEntry(ExpirableEntry<K, V> newEntry) throws CacheException, ClassCastException {
+        byte[] keyBytes = serialize(newEntry.getKey());
+        byte[] valBytes = serialize(newEntry.getValue());
         jedis.set(keyBytes, valBytes);
-        return oldVal;
     }
 
     @Override
-    protected V doRemove(K key) throws CacheException, ClassCastException {
+    protected ExpirableEntry<K, V> removeEntry(K key) throws CacheException, ClassCastException {
         byte[] keyBytes = serialize(key);
-        V oldVal = doGet(key);
+        ExpirableEntry<K, V> oldEntry = getEntry(keyBytes);
         jedis.del(keyBytes);
-        return oldVal;
+        return oldEntry;
     }
 
     @Override
-    protected void doClear() throws CacheException {
+    protected Set<K> keySet() {
+        return null;
+    }
 
+    @Override
+    protected void clearEntries() throws CacheException {
     }
 
     @Override
@@ -61,13 +69,9 @@ public class JedisCache<K extends Serializable, V extends Serializable> extends 
         this.jedis.close();
     }
 
-    @Override
-    protected Iterator<Entry<K, V>> newIterator() {
-        return null;
-    }
-
     /**
      * 序列化对象
+     *
      * @param key
      * @return
      * @throws CacheException
@@ -86,14 +90,16 @@ public class JedisCache<K extends Serializable, V extends Serializable> extends 
 
     /**
      * 反序列化
+     *
      * @param valBytes
      * @throws CacheException
      */
-    private V deserialize(byte[] valBytes) throws CacheException {
-        V val = null;
+    private <T> T deserialize(byte[] valBytes) throws CacheException {
+        if (valBytes == null) return null;
+        T val = null;
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(valBytes);
              ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
-            val = (V) objectInputStream.readObject();
+            val = (T) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new CacheException(e);
         }
