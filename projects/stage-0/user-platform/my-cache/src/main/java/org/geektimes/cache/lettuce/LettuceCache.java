@@ -33,7 +33,7 @@ public class LettuceCache<K extends Serializable, V extends Serializable> extend
     @Override
     protected ExpirableEntry<K, V> getEntry(K key) throws CacheException, ClassCastException {
         V val = redisCommands.get(key);
-        return ExpirableEntry.of(key, val);
+        return val == null ? null : ExpirableEntry.of(key, val);
     }
 
     @Override
