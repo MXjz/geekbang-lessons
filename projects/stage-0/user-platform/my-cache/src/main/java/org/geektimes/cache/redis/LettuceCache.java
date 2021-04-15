@@ -1,13 +1,17 @@
-package org.geektimes.cache.lettuce;
+package org.geektimes.cache.redis;
 
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import org.geektimes.cache.AbstractCache;
 import org.geektimes.cache.ExpirableEntry;
+import org.geektimes.cache.redis.codec.KeyValCodec;
 
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
-import java.io.*;
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -19,9 +23,15 @@ public class LettuceCache<K extends Serializable, V extends Serializable> extend
 
     private final RedisCommands<K, V> redisCommands;
 
-    protected LettuceCache(CacheManager cacheManager, String cacheName, Configuration<K, V> configuration, RedisCommands<K, V> redisCommands) {
+    private final RedisClient redisClient;
+
+    private final StatefulRedisConnection<K, V> connection;
+
+    protected LettuceCache(CacheManager cacheManager, String cacheName, Configuration<K, V> configuration, RedisURI redisURI) {
         super(cacheManager, cacheName, configuration);
-        this.redisCommands = redisCommands;
+        redisClient = RedisClient.create(redisURI);
+        connection = redisClient.connect(new KeyValCodec<>(configuration.getKeyType(), configuration.getValueType()));     // <3> 创建线程安全的连接
+        redisCommands = connection.sync();                // <4> 创建同步命令
     }
 
     @Override
@@ -59,4 +69,9 @@ public class LettuceCache<K extends Serializable, V extends Serializable> extend
         return null;
     }
 
+    @Override
+    protected void doClose() {
+        connection.close();   // <5> 关闭连接
+        redisClient.shutdown();  // <6> 关闭客户端
+    }
 }

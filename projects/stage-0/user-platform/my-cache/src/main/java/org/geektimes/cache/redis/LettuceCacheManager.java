@@ -1,11 +1,6 @@
-package org.geektimes.cache.lettuce;
+package org.geektimes.cache.redis;
 
-import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisCommands;
-import io.lettuce.core.codec.RedisCodec;
-import io.lettuce.core.protocol.RedisCommand;
 import org.geektimes.cache.AbstractCacheManager;
 
 import javax.cache.Cache;
@@ -30,9 +25,6 @@ public class LettuceCacheManager extends AbstractCacheManager {
 
     @Override
     protected <K, V, C extends Configuration<K, V>> Cache doCreateCache(String cacheName, C configuration) {
-        RedisClient redisClient = RedisClient.create(redisURI);
-        StatefulRedisConnection<String, String> connection = redisClient.connect();     // <3> 创建线程安全的连接
-        RedisCommands<String, String> redisCommands = connection.sync();                // <4> 创建同步命令
-        return new LettuceCache(this, cacheName, configuration, redisCommands);
+        return new LettuceCache(this, cacheName, configuration, redisURI);
     }
 }

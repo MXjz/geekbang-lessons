@@ -5,5 +5,8 @@
 
 ## 第六次作业
 
-1. lettuce实现见org.geektimes.cache.lettuce包下的实现
-2. 测试类见org.geektimes.cache.CachingTest#testSampleLettuce，只实现了<K, V> 为 <String, String>的方式，其他类型方式思路有一些模糊，需要再思考一下
+1. lettuce实现见org.geektimes.cache.redis包下的实现
+2. 测试方法见test包下的：
+   1. org.geektimes.cache.CachingTest#testStringStringLettuce
+   2. org.geektimes.cache.CachingTest#testStringIntegerLettuce
+

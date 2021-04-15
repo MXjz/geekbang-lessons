@@ -105,8 +105,11 @@ public class CachingTest {
         assertNull(cache.get(key));
     }
 
+    /**
+     * <String,String>类型缓存测试
+     */
     @Test
-    public void testSampleLettuce() {
+    public void testStringStringLettuce() {
         CachingProvider cachingProvider = Caching.getCachingProvider();
         CacheManager cacheManager = cachingProvider.getCacheManager(URI.create("redis://127.0.0.1:6379/0"), null);
         // configure the cache
@@ -130,6 +133,41 @@ public class CachingTest {
         cache.put(key, value1);
 
         String value2 = cache.get(key);
+        assertEquals(value1, value2);
+        cache.remove(key);
+        assertNull(cache.get(key));
+    }
+
+    /**
+     * <String,Integer>类型缓存测试
+     */
+    @Test
+    public void testStringIntegerLettuce() {
+        CachingProvider cachingProvider = Caching.getCachingProvider();
+        CacheManager cacheManager = cachingProvider.getCacheManager(URI.create("redis://127.0.0.1:6379/0"), null);
+        // configure the cache
+        MutableConfiguration<String, Integer> config =
+                new MutableConfiguration<String, Integer>()
+                        .setTypes(String.class, Integer.class);
+
+        // create the cache
+        Cache<String, Integer> cache = cacheManager.createCache("lettuceCache", config);
+
+        // add listener
+        cache.registerCacheEntryListener(cacheEntryListenerConfiguration(new TestCacheEntryListener<>()));
+
+        // cache operations
+        String key = "lettuce-key";
+        Integer value1 = 1;
+        cache.put(key, value1);
+
+        // update
+        // 在存入redis后，查询时总是查不出对应 key 的值
+        // 发现存进去的key是\xac\xed\x00\x05t\x00\x0blettuce-key
+        value1 = 2;
+        cache.put(key, value1);
+
+        Integer value2 = cache.get(key);
         assertEquals(value1, value2);
         cache.remove(key);
         assertNull(cache.get(key));
