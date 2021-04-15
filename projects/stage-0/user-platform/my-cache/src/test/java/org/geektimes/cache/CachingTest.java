@@ -106,6 +106,36 @@ public class CachingTest {
     }
 
     @Test
+    public void testSampleLettuce() {
+        CachingProvider cachingProvider = Caching.getCachingProvider();
+        CacheManager cacheManager = cachingProvider.getCacheManager(URI.create("redis://127.0.0.1:6379/0"), null);
+        // configure the cache
+        MutableConfiguration<String, String> config =
+                new MutableConfiguration<String, String>()
+                        .setTypes(String.class, String.class);
+
+        // create the cache
+        Cache<String, String> cache = cacheManager.createCache("lettuceCache", config);
+
+        // add listener
+        cache.registerCacheEntryListener(cacheEntryListenerConfiguration(new TestCacheEntryListener<>()));
+
+        // cache operations
+        String key = "lettuce-key";
+        String value1 = "hello";
+        cache.put(key, value1);
+
+        // update
+        value1 = "hello2";
+        cache.put(key, value1);
+
+        String value2 = cache.get(key);
+        assertEquals(value1, value2);
+        cache.remove(key);
+        assertNull(cache.get(key));
+    }
+
+    @Test
     public void testLettuce() {
         RedisClient redisClient = RedisClient.create("redis://localhost:6379/0");
         StatefulRedisConnection<String, String> connection = redisClient.connect();
